@@ -35,12 +35,12 @@ end
 function TurtleController:move(mCommand)
     local abbreviations = {f = "forward", u = "up", d="down", tl ="turnLeft", tr = "turnRight", b = "back"} 
     local moveOdometry = {
-        "forward" = function(tc) tc.coords:add(tc.direction) end,
-        "back" = function(tc) tc.coords:sub(tc.direction) end,
-        "up" = function(tc) tc.coords:add(vector.new(0,1,0)) end,
-        "down" = function(tc) tc.coords:add(vector.new(0,1,0)) end,
-        "turnLeft" = function(tc) tc.direction = vector.new(-tc.direction.z,0,tc.direction.x) end,
-        "turnRight" = function(tc) tc.direction = vector.new(tc.direction.z, 0, -tc.direction.x) end
+        forward = function(tc) tc.coords:add(tc.direction) end,
+        back = function(tc) tc.coords:sub(tc.direction) end,
+        up = function(tc) tc.coords:add(vector.new(0,1,0)) end,
+        down = function(tc) tc.coords:add(vector.new(0,1,0)) end,
+        turnLeft = function(tc) tc.direction = vector.new(-tc.direction.z,0,tc.direction.x) end,
+        turnRight = function(tc) tc.direction = vector.new(tc.direction.z, 0, -tc.direction.x) end
     }
     local success = false
     
@@ -72,15 +72,15 @@ function TurtleController:face(vec)
 end
 
 function TurtleController:orientationToString()
-    local directionNames = {"1,0,0" = "east", "0,0,-1" = "south", "-1,0,0" = "west", "0,0,1" = "north"}
+    local directionNames = {1,0,0 = "east", 0,0,-1 = "south", -1,0,0 = "west", 0,0,1 = "north"}
     return directionNames[self.direction.tostring()]
 end
 
 function TurtleController:orientationToDegrees()
-    local directionNumbers = {"1,0,0" = 90, "0,0,-1" = 180, "-1,0,0" = 270, "0,0,1" = 0}
+    local directionNumbers = {1,0,0 = 90, 0,0,-1 = 180, -1,0,0 = 270, 0,0,1 = 0}
     return directionNumbers[self.direction.tostring()]
 end
 
-function goto
+--function goto
 
 setmetatable(TurtleController, {__call=TurtleController.__init__})
