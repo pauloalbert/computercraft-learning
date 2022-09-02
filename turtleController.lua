@@ -72,12 +72,12 @@ function TurtleController:face(vec)
 end
 
 function TurtleController:orientationToString()
-    local directionNames = {1,0,0 = "east", 0,0,-1 = "south", -1,0,0 = "west", 0,0,1 = "north"}
+    local directionNames = {['1,0,0'] = "east", ['0,0,-1'] = "south", ['-1,0,0'] = "west", ['0,0,1'] = "north"}
     return directionNames[self.direction.tostring()]
 end
 
 function TurtleController:orientationToDegrees()
-    local directionNumbers = {1,0,0 = 90, 0,0,-1 = 180, -1,0,0 = 270, 0,0,1 = 0}
+    local directionNumbers = {['1,0,0'] = 90, ['0,0,-1'] = 180, ['-1,0,0'] = 270, ['0,0,1'] = 0}
     return directionNumbers[self.direction.tostring()]
 end
 
