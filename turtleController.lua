@@ -5,9 +5,9 @@ function TurtleController.__init__ (returnOnFuel,returnOnFilled, saveExact, xs,y
     local self = {returning = false, FUEL_RETURNS = returnOnFuel, INV_RETURNS = returnOnFilled}
     if(zs ~= nil) then
         self.coords = vector.new(xs, ys, zs)
-    else then
+    else
         self.coords = vector.new(gps.locate())
-        if self.coords.x == nil do
+        if self.coords.x == nil then
             print("COULD NOT GET COORDINATES")
             self.coords = vector.new(0,0,0)
         end
@@ -20,7 +20,7 @@ end
 function TurtleController:calibrateOrientation()
     local startCoords = vector.new(gps.locate())
     for i=0,3 do
-        if turtle.forward() do
+        if turtle.forward() then
             local endCoords = vector.new(gps.locate())
             self.direction = endCoords - startCoords
             tc.coords:add(tc.direction)
@@ -62,7 +62,7 @@ end
 
 function TurtleController:face(vec)
     for i=0,3 do
-        if vec == self.direction do
+        if vec == self.direction then
             return true   
         end
         self:move("turnRight")
