@@ -54,6 +54,8 @@ end
 resetAllRedstone()
 while true do
     periodic()
+    os.queueEvent("randomEvent")
+    os.pullEvent()
 end
 
 --[[
