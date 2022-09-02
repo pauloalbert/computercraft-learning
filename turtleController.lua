@@ -17,6 +17,21 @@ function TurtleController.__init__ (returnOnFuel,returnOnFilled, saveExact, xs,y
     return self
 end
 
+function TurtleController:calibrateOrientation()
+    local startCoords = vector.new(gps.locate())
+    for i=0,3 do
+        if turtle.forward() do
+            local endCoords = vector.new(gps.locate())
+            self.direction = endCoords - startCoords
+            tc.coords:add(tc.direction)
+            return true
+        end
+        turtle.turnRight()
+    end
+    print("CANT MOVE")
+    return false
+end
+
 function TurtleController:move(mCommand)
     local abbreviations = {f = "forward", u = "up", d="down", tl ="turnLeft", tr = "turnRight", b = "back"} 
     local moveOdometry = {
@@ -45,5 +60,27 @@ function TurtleController:move(mCommand)
     return success
 end
 
+function TurtleController:face(vec)
+    for i=0,3 do
+        if vec == self.direction do
+            return true   
+        end
+        self:move("turnRight")
+    end
+    print("INVALID INPUT VECTOR")
+    return false
+end
+
+function TurtleController:orientationToString()
+    local directionNames = {"1,0,0" = "east", "0,0,-1" = "south", "-1,0,0" = "west", "0,0,1" = "north"}
+    return directionNames[self.direction.tostring()]
+end
+
+function TurtleController:orientationToDegrees()
+    local directionNumbers = {"1,0,0" = 90, "0,0,-1" = 180, "-1,0,0" = 270, "0,0,1" = 0}
+    return directionNumbers[self.direction.tostring()]
+end
+
+function goto
 
 setmetatable(TurtleController, {__call=TurtleController.__init__})
