@@ -48,7 +48,7 @@ function TurtleController:move(mCommand)
         mCommand = abreviations[mCommand]
     end
 
-    if not moveActions[mCommand] then
+    if not moveOdometry[mCommand] then
         print("INCOMPATIBLE COMMAND ".. mCommand)
         return
     end
@@ -81,6 +81,6 @@ function TurtleController:orientationToDegrees()
     return directionNumbers[self.direction.tostring()]
 end
 
---function goto
+function TurtleController:
 
 setmetatable(TurtleController, {__call=TurtleController.__init__})
