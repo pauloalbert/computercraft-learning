@@ -23,7 +23,7 @@ function TurtleController:calibrateOrientation()
         if turtle.forward() then
             local endCoords = vector.new(gps.locate())
             self.direction = endCoords - startCoords
-            tc.coords:add(tc.direction)
+            self.coords:add(self.direction)
             return true
         end
         turtle.turnRight()
@@ -54,7 +54,7 @@ function TurtleController:move(mCommand)
     end
 
     success = turtle[mCommand]() --runs turtle.mCommand()
-    if success then
+    if success and self:direction ~= nil then
         moveOdometry[mCommand](self)
     end
     return success
