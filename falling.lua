@@ -4,10 +4,49 @@ This version written by Gopher, at the request of Dan200, for
 ComputerCraft v1.6. No particular rights are reserved.
 --]]
 
+--Color picker between RGB and monochrome
 local function colorass(c,bw)
     return term.isColor() and c or bw
   end
   
+local PIECES = {"l", "j", "s", "z", "o", "t", "i"}
+
+local TPEZ = {"l"= {{0, 0}, {-1, 0}, {1, 0}, {1, -1}},
+        "j"= {{0, 0}, {-1, 0}, {1, 0}, {-1, -1}},
+        "o"= {{0, 0}, {0, -1}, {1, 0}, {1, -1}},
+        "s"= {{0, 0}, {-1, 0}, {0, -1}, {1, -1}},
+        "z"= {{0, 0}, {-1, -1}, {0, -1}, {1, 0}},
+        "t"= {{0, 0}, {-1, 0}, {1, 0}, {0, -1}},
+        "i"= {{0, 0}, {-1, 0}, {1, 0}, {2, 0}}}
+
+local TPCLR = {"l" = colorass(colors.orange, colors.white),
+         "j" = colorass(colors.blue, colors.white),
+         "o" = colorass(colors.yellow, colors.white),
+         "s" = colorass(colors.green, colors.white),
+         "z" = colorass(colors.red, colors.white),
+         "t" = colorass(colors.purple, colors.white),
+         "i" = colorass(colors.lightBlue, colors.white)}
+
+local SRS = {["0>>1"] = {{0, 0}, {-1, 0}, {-1, -1}, {0, 2}, {-1, 2}},
+       ["1>>0"]= {{0, 0}, {1, 0}, {1, 1}, {0, -2}, {1, -2}},
+       ["1>>2"]= {{0, 0}, {1, 0}, {1, 1}, {0, -2}, {1, -2}},
+       ["2>>1"]= {{0, 0}, {-1, 0}, {-1, -1}, {0, 2}, {-1, 2}},
+       ["2>>3"]= {{0, 0}, {1, 0}, {1, -1}, {0, 2}, {1, 2}},
+       ["3>>2"]= {{0, 0}, {-1, 0}, {-1, 1}, {0, -2}, {-1, -2}},
+       ["3>>0"]= {{0, 0}, {-1, 0}, {-1, 1}, {0, -2}, {-1, -2}},
+       ["0>>3": {{0, 0}, {1, 0}, {1, -1}, {0, 2}, {1, 2}},
+       }
+
+local ISRS = {"1>>0": {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
+       "0>>1": {{0, 0}, {2, 0}, {-1, 0}, {2, -1}, {-1, 2}},
+       "1>>2": {{0, 0}, {-1, 0}, {2, 0}, {-1, -2}, {2, 1}},
+       "2>>1": {{0, 0}, {1, 0}, {-2, 0}, {1, 2}, {-2, -1}},
+       "3>>2": {{0, 0}, {2, 0}, {-1, -0}, {2, -1}, {-1, 2}},
+       "2>>3": {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
+       "3>>0": {{0, 0}, {1, 0}, {-2, 0}, {1, 2}, {-2, 1}},
+       "0>>3": {{0, 0}, {-1, 0}, {2, 0}, {-1, -2}, {2, 1}},
+}
+
   local block_s1= {
       {
         { 1,0,0,0, },
@@ -162,6 +201,7 @@ local function colorass(c,bw)
   
   local points={4,10,30,120}
   
+  --get only the first 'amt' letters of a text
   local function lpad(text,amt)
     text=tostring(text)
     return string.rep(" ",amt-#text)..text
