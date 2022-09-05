@@ -416,9 +416,9 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
         elseif key==keys.down or key==keys.s then
           blockFall()
           dropTimer = os.startTimer(dropSpeed)
-        elseif key==keys.z or keys.j then
+        elseif key==keys.z or key==keys.j then
           dr=-1
-        elseif key==keys.x or keys.k then
+        elseif key==keys.x or key==keys.k then
           dr=1
         elseif key==keys.space then
           hidePit()
