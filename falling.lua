@@ -55,7 +55,7 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
        ["0>>3"]= {{0, 0}, {-1, 0}, {2, 0}, {-1, -2}, {2, 1}},
 }
 
-  local points={4,10,30,120,120,240,300}
+  local points={4,10,30,120}
   
   --get only the first 'amt' letters of a text
   local function lpad(text,amt)
@@ -197,7 +197,7 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
       term.setBackgroundColor(TPCLR[block])
       for i=1,4 do
         local loc = rotateCoords(TPEZ[block][i],rot)
-        term.setCursorPos((xp+loc[1])*2-3,yp++loc[2]-1-heightAdjust)
+        term.setCursorPos((xp+loc[1])*2-3,yp+loc[2]-1-heightAdjust)
         term.write("  ") --ADD colorless support {}
       end
     end
@@ -255,7 +255,7 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
   
   
     local curBlock=next
-    next=blocks[math.random(1,7)]
+    next=bagGetNext()
   
     local curX, curY, curRot=4, 1, 1
     local dropTimer=os.startTimer(dropSpeed)
@@ -272,9 +272,9 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
             term.setBackgroundColor(colors.black)
             term.write("  ")
           else
-            term.setTextColor(pit[r][c].fg)
-            term.setBackgroundColor(pit[r][c].bg)
-            term.write(pit[r][c].ch)
+            term.setTextColor(TPCLR[pit[r][c]])
+            term.setBackgroundColor(TPCLR[pit[r][c]])
+            term.write("  ")--bring back tetris
           end
         end
       end
@@ -330,9 +330,9 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
             r=rows[r]
             term.setCursorPos(1,r-heightAdjust)
             for c=1,10 do
-              term.setTextColor(pit[r][c].bg)
-              term.setBackgroundColor(pit[r][c].fg)
-              term.write(pit[r][c].ch)
+              term.setTextColor(TPCLR[pit[r][c]])
+              term.setBackgroundColor(TPCLR[pit[r][c]])
+              term.write("  ") --char
             end
           end
           sleep(.1)
@@ -340,9 +340,9 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
             r=rows[r]
             term.setCursorPos(1,r-heightAdjust)
             for c=1,10 do
-              term.setTextColor(pit[r][c].fg)
-              term.setBackgroundColor(pit[r][c].bg)
-              term.write(pit[r][c].ch)
+              term.setTextColor(TPCLR[pit[r][c]])
+              term.setBackgroundColor(TPCLR[pit[r][c]])
+              term.write("  ") --char
             end
           end
         end
@@ -370,7 +370,7 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
   
     local function blockFall()
       local result = false
-      if testBlockAt(curBlock,curX,curY+1,curRot) then
+      if testBlockAt(curBlock,curX,curY+1,curRot) then --TODO STALL
         pitBlock(curBlock,curX,curY,curRot)
         --detect rows that clear
         clearRows()
@@ -384,7 +384,7 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
         end
         drawBlockAt(curBlock,curX,curY,curRot)
         eraseBlockAt(next,11.5,15+heightAdjust,1)
-        next=blocks[math.random(1,7)]
+        next=getBagNext()
         drawBlockAt(next,11.5,15+heightAdjust,1)
         return true
       else
@@ -406,15 +406,22 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
       elseif e[1]=="key" then
         local key=e[2]
         local dx,dy,dr=0,0,0
-        if key==keys.left or key==keys.a then
+        if key==keys.left or key==keys.a then --TODO fixelseif?
           dx=-1
         elseif key==keys.right or key==keys.d then
           dx=1
         elseif key==keys.up or key==keys.w then
-          dr=1
-        elseif key==keys.down or key==keys.s then
           while not blockFall() do end
           dropTimer=os.startTimer(dropSpeed)
+        elseif key==keys.down or key==keys.s then
+          blockFall()
+          dropTimer = os.startTimer(dropSpeed)
+        elseif key==keys.z or keys.j then
+          dr=-1
+        end
+        elseif key==keys.x or keys.k then
+          dr=1
+        end
         elseif key==keys.space then
           hidePit()
           msgBox("Paused")
@@ -423,12 +430,25 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
           drawBlockAt(curBlock,curX,curY,curRot)
           dropTimer=os.startTimer(dropSpeed)
         end
-        if dx+dr~=0 then
-          if not testBlockAt(curBlock,curX+dx,curY+dy,(dr>0 and curRot%#curBlock+dr or curRot)) then
+        if dr ~= 0 then
+          local spinstr =  curRot..">>"..(curRot+dr)%4
+          local srstype = {}
+          if curBlock == "i" then srstype = SRS[spinstr] else srstype = ISRS[spinstr] end
+          for i=1,#srstype do
+            if not testBlockAt(curBlock,curX+dx+srstype[i][1],curY+dy+srstype[i][2],(curRot+dr)%4) then
+              eraseBlockAt(curBlock,curX,curY,curRot)
+              curX=curX+dx+srstype[i][1]
+              curY=curY+dy+srstype[i][2]
+              curRot = (curRot+dr)%4
+              drawBlockAt(curBlock,curX,curY,curRot)
+              break
+            end
+          end
+        else
+          if not testBlockAt(curBlock,curX+dx,curY+dy,curRot) then
             eraseBlockAt(curBlock,curX,curY,curRot)
             curX=curX+dx
             curY=curY+dy
-            curRot=dr==0 and curRot or (curRot%#curBlock+dr)
             drawBlockAt(curBlock,curX,curY,curRot)
           end
         end
