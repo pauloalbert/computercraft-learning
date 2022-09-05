@@ -19,21 +19,21 @@ end
 
 local PIECES = {"l", "j", "s", "z", "o", "t", "i"}
 
-local TPEZ = {"l"= {{0, 0}, {-1, 0}, {1, 0}, {1, -1}},
-        "j"= {{0, 0}, {-1, 0}, {1, 0}, {-1, -1}},
-        "o"= {{0, 0}, {0, -1}, {1, 0}, {1, -1}},
-        "s"= {{0, 0}, {-1, 0}, {0, -1}, {1, -1}},
-        "z"= {{0, 0}, {-1, -1}, {0, -1}, {1, 0}},
-        "t"= {{0, 0}, {-1, 0}, {1, 0}, {0, -1}},
-        "i"= {{0, 0}, {-1, 0}, {1, 0}, {2, 0}}}
+local TPEZ = {l= {{0, 0}, {-1, 0}, {1, 0}, {1, -1}},
+        j= {{0, 0}, {-1, 0}, {1, 0}, {-1, -1}},
+        o= {{0, 0}, {0, -1}, {1, 0}, {1, -1}},
+        s= {{0, 0}, {-1, 0}, {0, -1}, {1, -1}},
+        z= {{0, 0}, {-1, -1}, {0, -1}, {1, 0}},
+        t= {{0, 0}, {-1, 0}, {1, 0}, {0, -1}},
+        i= {{0, 0}, {-1, 0}, {1, 0}, {2, 0}}}
 
-local TPCLR = {"l" = colorass(colors.orange, colors.white),
-         "j" = colorass(colors.blue, colors.white),
-         "o" = colorass(colors.yellow, colors.white),
-         "s" = colorass(colors.green, colors.white),
-         "z" = colorass(colors.red, colors.white),
-         "t" = colorass(colors.purple, colors.white),
-         "i" = colorass(colors.lightBlue, colors.white)}
+local TPCLR = {l = colorass(colors.orange, colors.white),
+         j = colorass(colors.blue, colors.white),
+         o = colorass(colors.yellow, colors.white),
+         s = colorass(colors.green, colors.white),
+         z = colorass(colors.red, colors.white),
+         t = colorass(colors.purple, colors.white),
+         i = colorass(colors.lightBlue, colors.white)}
 
 local SRS = {["0>>1"] = {{0, 0}, {-1, 0}, {-1, -1}, {0, 2}, {-1, 2}},
        ["1>>0"]= {{0, 0}, {1, 0}, {1, 1}, {0, -2}, {1, -2}},
@@ -94,12 +94,12 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
     local tbag = {"i"}
     local function bagGetNext()
       local returnLetter = nil
-      if #tbag > 0 do
+      if #tbag > 0 then
         local chosen_num = math.random(1,#tbag)
         returnLetter = tbag[chosen_num]
         table.remove(tbag, chosen_num)
       end
-      if #tbag == 0 do
+      if #tbag == 0 then
         for i=1,#PIECES do
           tbag.insert(PIECES[i])
         end
@@ -207,7 +207,7 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
       term.setBackgroundColor(colors.black)
       for i=1,4 do
         local loc = rotateCoords(TPEZ[block][i],rot)
-        term.setCursorPos((xp+loc[1])*2-3,yp++loc[2]-1-heightAdjust)
+        term.setCursorPos((xp+loc[1])*2-3,yp+loc[2]-1-heightAdjust)
         term.write("  ") --ADD colorless support {}
       end
     end
@@ -418,10 +418,8 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
           dropTimer = os.startTimer(dropSpeed)
         elseif key==keys.z or keys.j then
           dr=-1
-        end
         elseif key==keys.x or keys.k then
           dr=1
-        end
         elseif key==keys.space then
           hidePit()
           msgBox("Paused")
