@@ -101,7 +101,7 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
       end
       if #tbag == 0 then
         for i=1,#PIECES do
-          tbag.insert(PIECES[i])
+          table.insert(tbag,PIECES[i])
         end
       end
       return returnLetter
@@ -257,7 +257,7 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
     local curBlock=next
     next=bagGetNext()
   
-    local curX, curY, curRot=4, 1, 1
+    local curX, curY, curRot=4, 5, 0
     local dropTimer=os.startTimer(dropSpeed)
   
     drawBlockAt(next,11.5,15+heightAdjust,1)
@@ -378,7 +378,7 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
         curBlock=next
         curX=4
         curY=1
-        curRot=1
+        curRot=0
         if testBlockAt(curBlock,curX,curY,curRot) then
           halt=true
         end
@@ -429,9 +429,9 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
           dropTimer=os.startTimer(dropSpeed)
         end
         if dr ~= 0 then
-          local spinstr =  curRot..">>"..(curRot+dr)%4
+          local spinstr =  (curRot%4)..">>"..(curRot+dr)%4
           local srstype = {}
-          if curBlock == "i" then srstype = SRS[spinstr] else srstype = ISRS[spinstr] end
+          if curBlock == "i" then srstype = ISRS[spinstr] else srstype = SRS[spinstr] end
           for i=1,#srstype do
             if not testBlockAt(curBlock,curX+dx+srstype[i][1],curY+dy+srstype[i][2],(curRot+dr)%4) then
               eraseBlockAt(curBlock,curX,curY,curRot)
