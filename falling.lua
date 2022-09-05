@@ -96,12 +96,18 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
       local returnLetter = nil
       if #tbag > 0 do
         local chosen_num = math.random(1,#tbag)
+        returnLetter = tbag[chosen_num]
+        table.remove(tbag, chosen_num)
       end
-      table.remove(tbag, chosen_num)
-      
+      if #tbag == 0 do
+        for i=1,#PIECES do
+          tbag.insert(PIECES[i])
+        end
+      end
+      return returnLetter
     end
-
-    local next=PIECES[math.random(1,#PIECES)]
+    bagGetNext()
+    local next=bagGetNext()
   
     local pit={}
   
