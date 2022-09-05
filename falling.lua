@@ -91,7 +91,17 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
     local score=0
     local lines=0
     local initialLevel=level
-    local next=blocks[math.random(1,#blocks)]
+    local tbag = {"i"}
+    local function bagGetNext()
+      local returnLetter = nil
+      if #tbag > 0 do
+        local chosen_num = math.random(1,#tbag)
+      end
+      table.remove(tbag, chosen_num)
+      
+    end
+
+    local next=PIECES[math.random(1,#PIECES)]
   
     local pit={}
   
@@ -177,51 +187,40 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
     end
   
     local function drawBlockAt(block,xp,yp,rot)
-      term.setTextColor(block.clr)
-      for y=1,4 do
-        for x=1,4 do
-          if block[rot][y][x]==1 then
-            term.setCursorPos((xp+x)*2-3,yp+y-1-heightAdjust)
-            term.write(block.ch)
-          end
-        end
+      term.setTextColor(TPCLR[block])
+      term.setBackgroundColor(TPCLR[block])
+      for i=1,4 do
+        local loc = rotateCoords(TPEZ[block][i],rot)
+        term.setCursorPos((xp+loc[1])*2-3,yp++loc[2]-1-heightAdjust)
+        term.write("  ") --ADD colorless support {}
       end
     end
   
     local function eraseBlockAt(block,xp,yp,rot)
       term.setTextColor(colors.white)
       term.setBackgroundColor(colors.black)
-      for y=1,4 do
-        for x=1,4 do
-          if block[rot][y][x]==1 then
-            term.setCursorPos((xp+x)*2-3,yp+y-1-heightAdjust)
-            term.write("  ")
-          end
-        end
+      for i=1,4 do
+        local loc = rotateCoords(TPEZ[block][i],rot)
+        term.setCursorPos((xp+loc[1])*2-3,yp++loc[2]-1-heightAdjust)
+        term.write("  ") --ADD colorless support {}
       end
     end
   
     local function testBlockAt(block,xp,yp,rot)
-      for y=1,4 do
-        local ty=yp+y-1
-        for x=1,4 do
-          local tx=xp+x-1
-          if block[rot][y][x]==1 then
-            if tx>10 or tx<1 or ty>20 or pit[ty][tx]~=0 then
-              return true
-            end
-          end
+      for i=1,4 do
+        local loc = rotateCoords(TPEZ[block][i],rot)
+        local tx, ty = xp + loc[1] - 1, yp + loc[2] - 1
+
+        if tx>10 or tx<1 or ty>20 or pit[ty][tx]~=0 then
+          return true
         end
       end
     end
   
     local function pitBlock(block,xp,yp,rot)
-      for y=1,4 do
-        for x=1,4 do
-          if block[rot][y][x]==1 then
-            pit[yp+y-1][xp+x-1]=block
-          end
-        end
+      for i=1,4 do
+        local loc = rotateCoords(TPEZ[block][i],rot)
+        pit[yp+loc[2]-1][xp+loc[1]-1]=block
       end
     end
   
