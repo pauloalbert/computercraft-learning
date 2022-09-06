@@ -260,7 +260,7 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
     local curX, curY, curRot=5, 2, 0
     local dropTimer=os.startTimer(dropSpeed)
   
-    drawBlockAt(next,13,16+heightAdjust,1)
+    drawBlockAt(next,12.5,16+heightAdjust,1)
     drawBlockAt(curBlock,curX,curY,curRot)
   
     local function redrawPit()
@@ -378,23 +378,23 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
     
           curBlock=next
           curX=5
-          curY=3
+          curY=2
           curRot=0
           if testBlockAt(curBlock,curX,curY,curRot) then
             halt=true
           end
           drawBlockAt(curBlock,curX,curY,curRot)
-          eraseBlockAt(next,11.5,15+heightAdjust,1)
+          eraseBlockAt(next,12.5,16+heightAdjust,1)
           next=bagGetNext()
-          drawBlockAt(next,13.5,16+heightAdjust,1)
-          return true
-        else
+          drawBlockAt(next,12.5,16+heightAdjust,1)
           place_soon = true
+          return true
         end
       else
         eraseBlockAt(curBlock,curX,curY,curRot)
         curY=curY+1
         drawBlockAt(curBlock,curX,curY,curRot)
+        place_soon = true
         return false
       end
     end
