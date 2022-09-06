@@ -216,8 +216,8 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
       for i=1,4 do
         local loc = rotateCoords(TPEZ[block][i],rot)
         local tx, ty = xp + loc[1] - 1, yp + loc[2] - 1
-
-        if tx>10 or tx<1 or ty>20 or pit[ty][tx]~=0 then
+        if ty < 1 then -- skip over checks which are above bounds.
+        elseif tx>10 or tx<1 or ty>20 or pit[ty][tx]~=0 then
           return true
         end
       end
