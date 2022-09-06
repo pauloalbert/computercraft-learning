@@ -108,7 +108,7 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
     end
     bagGetNext()
     local next=bagGetNext()
-  
+    local place_soon = true
     local pit={}
   
   
@@ -371,22 +371,26 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
     local function blockFall()
       local result = false
       if testBlockAt(curBlock,curX,curY+1,curRot) then --TODO STALL
-        pitBlock(curBlock,curX,curY,curRot)
-        --detect rows that clear
-        clearRows()
-  
-        curBlock=next
-        curX=5
-        curY=3
-        curRot=0
-        if testBlockAt(curBlock,curX,curY,curRot) then
-          halt=true
+        if place_soon then
+          pitBlock(curBlock,curX,curY,curRot)
+          --detect rows that clear
+          clearRows()
+    
+          curBlock=next
+          curX=5
+          curY=3
+          curRot=0
+          if testBlockAt(curBlock,curX,curY,curRot) then
+            halt=true
+          end
+          drawBlockAt(curBlock,curX,curY,curRot)
+          eraseBlockAt(next,11.5,15+heightAdjust,1)
+          next=bagGetNext()
+          drawBlockAt(next,13.5,16+heightAdjust,1)
+          return true
+        else
+          place_soon = true
         end
-        drawBlockAt(curBlock,curX,curY,curRot)
-        eraseBlockAt(next,11.5,15+heightAdjust,1)
-        next=bagGetNext()
-        drawBlockAt(next,13.5,16+heightAdjust,1)
-        return true
       else
         eraseBlockAt(curBlock,curX,curY,curRot)
         curY=curY+1
@@ -406,6 +410,7 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
       elseif e[1]=="key" then
         local key=e[2]
         local dx,dy,dr=0,0,0
+        place_soon = false -- TODO only stall for actual movement keys.
         if key==keys.left or key==keys.a then --TODO fixelseif?
           dx=-1
         elseif key==keys.right or key==keys.d then
