@@ -410,11 +410,12 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
       elseif e[1]=="key" then
         local key=e[2]
         local dx,dy,dr=0,0,0
-        place_soon = false -- TODO only stall for actual movement keys.
         if key==keys.left or key==keys.a then --TODO fixelseif?
           dx=-1
+          place_soon = false
         elseif key==keys.right or key==keys.d then
           dx=1
+          place_soon = false
         elseif key==keys.up or key==keys.w then
           while not blockFall() do end
           dropTimer=os.startTimer(dropSpeed)
@@ -423,8 +424,10 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
           dropTimer = os.startTimer(dropSpeed)
         elseif key==keys.z or key==keys.j then
           dr=-1
+          place_soon = false
         elseif key==keys.x or key==keys.k then
           dr=1
+          place_soon = false
         elseif key==keys.space then
           hidePit()
           msgBox("Paused")
