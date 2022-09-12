@@ -40,6 +40,9 @@ end
 local SAMPLETIME = 0.5
 
 local monitor = peripheral.find("monitor")
+if monitor == nil then
+	monitor = term.current()
+end
 
 local lastTimeSample = nil
 local timeSample = nil
