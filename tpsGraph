@@ -49,6 +49,10 @@ local timeSample = nil
 
 local histogramTPS = {}
 
+local function colorass(c,bw)
+    return monitor.isColor() and c or bw
+end
+
 local function getWarningColor(tps)
    if tps > 20 then
        return colors.blue, 0
@@ -70,6 +74,7 @@ local function printHistogram(resultstable)
     local x,y = monitor.getSize()
     for index, tps in pairs(resultstable) do
         local color, height = getWarningColor(tps)
+        color = colorass(color,colors.white)
         local lx = x + 2*index -2*#resultstable - 2
         local ly = y - 1
         for i = 1, height do
@@ -81,9 +86,9 @@ local function printHistogram(resultstable)
 end
 
 --INIT--
-monitor.setBackgroundColor(colors.blue)
+monitor.setBackgroundColor(colorass(colors.blue,colors.black))
 monitor.clear()
-monitor.setTextColor(colors.black)
+monitor.setTextColor(colorass(colors.black,colors.white))
 monitor.setCursorPos(monitor.getSize(),1)
 monitor.write("Waiting for estimation..")
 
@@ -94,19 +99,19 @@ local function periodic()
     timeSample = webJson.getRealTime()
     local tps = SAMPLETIME*20/((timeSample-lastTimeSample)/10000000)
     
-    monitor.setBackgroundColor(colors.blue)
+    monitor.setBackgroundColor(colorass(colors.blue,colors.black))
     local x,y = monitor.getSize()
-    monitor.setTextColor(getWarningColor(tps))
+    monitor.setTextColor(colorass(getWarningColor(tps),colors.white))
     local doBarGraph = x >= 20 and y>= 10
     if not doBarGraph then
-        monitor.setBackgroundColor(getWarningColor(tps))
+        monitor.setBackgroundColor(colorass(getWarningColor(tps),colors.white))
         monitor.setTextColor(colors.white)
     end
     monitor.clear()
     monitor.setCursorPos(x/2-1,y/4)
     monitor.write(math.floor(100*tps)/100)
     
-    monitor.setTextColor(colors.black)
+    monitor.setTextColor(colorass(colors.black,colors.white))
     monitor.setCursorPos(x/2,y/4-1)
     monitor.write("TPS")
     
