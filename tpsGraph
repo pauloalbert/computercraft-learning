@@ -96,13 +96,14 @@ local function periodic()
     
     monitor.setBackgroundColor(colors.blue)
     local x,y = monitor.getSize()
+    monitor.setTextColor(getWarningColor(tps))
     local doBarGraph = x >= 20 and y>= 10
     if not doBarGraph then
         monitor.setBackgroundColor(getWarningColor(tps))
+        monitor.setTextColor(colors.white)
     end
     monitor.clear()
     monitor.setCursorPos(x/2-1,y/4)
-    monitor.setTextColor(getWarningColor(tps))
     monitor.write(math.floor(100*tps)/100)
     
     monitor.setTextColor(colors.black)
