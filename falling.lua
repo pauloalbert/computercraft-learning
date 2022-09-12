@@ -109,6 +109,8 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
     bagGetNext()
     local next=bagGetNext()
     local place_soon = true
+    local PLACE_FORCE = 8
+    local place_count = PLACE_FORCE
     local pit={}
   
   
@@ -370,9 +372,11 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
   
     local function blockFall()
       local result = false
-      if testBlockAt(curBlock,curX,curY+1,curRot) then --TODO STALL
-        if place_soon then
+      if testBlockAt(curBlock,curX,curY+1,curRot) then
+        place_count = place_count -1
+        if place_soon or place_count < 0 then
           pitBlock(curBlock,curX,curY,curRot)
+          place_count = PLACE_FORCE
           --detect rows that clear
           clearRows()
     
@@ -493,7 +497,7 @@ local ISRS = {["1>>0"]= {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},
     local cx,cy=math.floor(width/2),math.floor(height/2)
   
     term.setCursorPos(cx-6,cy-2)
-    term.write("F A L L I N G")
+    term.write("F A L L I N G +")
   
     if playersDetected then
       if selected==0 then
