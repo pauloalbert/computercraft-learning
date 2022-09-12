@@ -37,7 +37,7 @@ end
 
 --WEBJSON END
 
-local SAMPLETIME = 0.5
+local SAMPLETIME = 3
 
 local monitor = peripheral.find("monitor")
 if monitor == nil then
@@ -81,8 +81,11 @@ local function printHistogram(resultstable)
 end
 
 --INIT--
-monitor.setBackgroundColor(colors.black)
+monitor.setBackgroundColor(colors.blue)
 monitor.clear()
+monitor.setTextColor(colors.black)
+monitor.setCursorPos(monitor.getSize(),1)
+monitor.write("Waiting for estimation..")
 
 --PERIODIC--
 local function periodic()
