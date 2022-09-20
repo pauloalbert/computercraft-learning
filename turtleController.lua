@@ -1,5 +1,13 @@
 
 TurtleController = {}
+--[[
+    Initialize the turtle controller.
+    returnOnFuel: boolean, if true, turtle will return to a recharge station noting that it will have enough fuel
+    returnOnFilled: boolean, if true, will return to base when inventory fills up
+    saveExact: boolean, if true, store every move made, so that the turtle can retrace its own steps.
+    [xs,ys,zs];; optional, ints, define initial position
+    [direction];; optional, string, define original orientation of robot
+]]--
 function TurtleController.__init__ (returnOnFuel,returnOnFilled, saveExact, xs,ys,zs, direction)
     --nil handling?
     local self = {returning = false, FUEL_RETURNS = returnOnFuel, INV_RETURNS = returnOnFilled}
@@ -71,16 +79,27 @@ function TurtleController:face(vec)
     return false
 end
 
-function TurtleController:orientationToString()
-    local directionNames = {['1,0,0'] = "east", ['0,0,-1'] = "south", ['-1,0,0'] = "west", ['0,0,1'] = "north"}
-    return directionNames[self.direction.tostring()]
+local directionConversions = {['1,0,0'] = {name = "east", angle = 90}, 
+                              ['0,0,-1'] = {name = "south", angle = 180},
+                              ['-1,0,0'] = {name="west", angle = 270}, 
+                              ['0,0,1'] = {name = "north", angle = 0}
+                        }
+
+function TurtleController:orientationAsString()
+    return directionConversions[self.direction.tostring()].name
 end
 
-function TurtleController:orientationToDegrees()
-    local directionNumbers = {['1,0,0'] = 90, ['0,0,-1'] = 180, ['-1,0,0'] = 270, ['0,0,1'] = 0}
-    return directionNumbers[self.direction.tostring()]
+function TurtleController:orientationInDegrees()
+    return directionConversions[self.direction.tostring()].angle
 end
 
+function TurtleController:importOrientation(direction)
+    if not direction then
+        return false
+    end
+    elseif type(direction) == 'string' then    
+
+    end
 function TurtleController:
 
 setmetatable(TurtleController, {__call=TurtleController.__init__})
