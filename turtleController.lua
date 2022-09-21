@@ -1,6 +1,6 @@
 local VERBOSE = false
 function debugPrint(input)
-    if VERBOSE do
+    if VERBOSE then
         print(input)
     end
 end
@@ -21,11 +21,12 @@ function TurtleController.__init__ (returnOnFuel,returnOnFilled, saveExact, xs,y
     else
         self.coords = vector.new(gps.locate())
         if self.coords.x == nil then
-            debugPrint("COULD NOT GET COORDINATES")
+            debugPrint("COULD NOT GET COORDINATES FROM GPS")
             self.coords = vector.new(0,0,0)
         end
     end
-    self.direction = direction
+    direction = TurtleController.valueToOrientation(direction)
+    if direction ~= nil then
     setmetatable (self, {__index=TurtleController})
     return self
 end
@@ -99,12 +100,12 @@ function TurtleController.orientationToDegrees(directionVector)
 end
 
 --[[Converts cardinal direction names ("east"), angles (270), and vector strings ([-1,0,0]) to valid vector.]]--
-function TurtleController.ValueToOrientation(directionValue)
-    if directionConversions[directionValue] ~= null do return directionConversions[directionValue].vector end
-    if type(directionValue) == 'number' do directionValue = (directionValue + 360 ) % 360  end --Make sure angles range between 0-360
+function TurtleController.valueToOrientation(directionValue)
+    if directionConversions[directionValue] ~= null then return directionConversions[directionValue].vector end
+    if type(directionValue) == 'number' then directionValue = (directionValue + 360 ) % 360  end --Make sure angles range between 0-360
     
     for direction, conversion in pairs(directionConversions) do
-        if conversion.angle == directionValue or conversion.name == directionValue do
+        if conversion.angle == directionValue or conversion.name == directionValue then
             return directionConversions[direction].vector
         end
     end
