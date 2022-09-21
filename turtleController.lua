@@ -79,18 +79,31 @@ function TurtleController:face(vec)
     return false
 end
 
-local directionConversions = {['1,0,0'] = {name = "east", angle = 90}, 
-                              ['0,0,-1'] = {name = "south", angle = 180},
-                              ['-1,0,0'] = {name="west", angle = 270}, 
-                              ['0,0,1'] = {name = "north", angle = 0}
+local directionConversions = {['1,0,0'] = {name = "east", angle = 90, vector = vector.new(1,0,0)}, 
+                              ['0,0,-1'] = {name = "south", angle = 180, vector = vector.new(0,0,-1)},
+                              ['-1,0,0'] = {name="west", angle = 270, vector = vector.new(-1,0,0)}, 
+                              ['0,0,1'] = {name = "north", angle = 0, vector = vector.new(0,0,1)}
                         }
 
-function TurtleController:orientationAsString()
-    return directionConversions[self.direction.tostring()].name
+function TurtleController.orientationToString(directionVector)
+    return directionConversions[directionVector.tostring()].name
 end
 
-function TurtleController:orientationInDegrees()
-    return directionConversions[self.direction.tostring()].angle
+function TurtleController.orientationToDegrees(directionVector)
+    return directionConversions[directionVector.tostring()].angle
+end
+
+--[[Converts cardinal direction names ("east"), angles (270), and vector strings ([-1,0,0]) to valid vector.]]--
+function TurtleController.ValueToOrientation(directionValue)
+    if directionConversions[directionValue] ~= null do return directionConversions[directionValue].vector end
+    if type(directionValue) == 'number' do directionValue = (directionValue + 360 ) % 360  end --Make sure angles range between 0-360
+    
+    for direction, conversion in pairs(directionConversions) do
+        if conversion.angle == directionValue or conversion.name == directionValue do
+            return directionConversions[direction].vector
+        end
+    end
+    return nil  --Incase of invalid input, return nil
 end
 
 function TurtleController:importOrientation(direction)
