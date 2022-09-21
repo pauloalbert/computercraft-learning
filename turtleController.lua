@@ -130,11 +130,16 @@ function TurtleController.valueToOrientation(directionValue)
     return nil  --Incase of invalid input, return nil
 end
 
+--[[converts input to vector and sets the direction to be that direction (doesnt work if already vector)]]
 function TurtleController:importOrientation(direction)
-    if not direction then
+    local newOrientation = TurtleController.valueToOrientation(direction)
+    if newOrientation ~= nil then
+        self.direction = newOrientation
+        return true
+    else
         return false
     end
-    elseif type(direction) == 'string' then    
+end
 
     end
 function TurtleController:
