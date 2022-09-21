@@ -27,6 +27,12 @@ function TurtleController.__init__ (returnOnFuel,returnOnFilled, saveExact, xs,y
     end
     direction = TurtleController.valueToOrientation(direction)
     if direction ~= nil then
+        self.direction = direction
+    else
+        if not self:calibrateOrientation() then
+            debugPrint("COULD NOT GET COORDINATES FROM GPS")
+        end
+    end
     setmetatable (self, {__index=TurtleController})
     return self
 end
@@ -37,7 +43,8 @@ function TurtleController:calibrateOrientation()
         if turtle.forward() then
             local endCoords = vector.new(gps.locate())
             self.direction = endCoords - startCoords
-            self.coords:add(self.direction)
+            --attempt to move back to start (might run out of fuel or get trolled by a player)
+            if not turtle.back() then self.coords:add(self.direction) end
             return true
         end
         turtle.turnRight()
@@ -75,13 +82,23 @@ function TurtleController:move(mCommand)
 end
 
 function TurtleController:face(vec)
+    if type(vec) ~= 'table' then
+        local newVec = TurtleController.valueToOrientation(vec)
+            
+        if not newVec then
+            debugPrint("TC:face() - INVALID INPUT: "..newVec)
+            return false
+        end
+        vec = newVec
+        end
+    end
     for i=0,3 do
         if vec == self.direction then
             return true   
         end
         self:move("turnRight")
     end
-    debugPrint("INVALID INPUT VECTOR")
+    debugPrint("TC:face() - INVALID VECTOR: "..vec.tostring())
     return false
 end
 
@@ -101,7 +118,8 @@ end
 
 --[[Converts cardinal direction names ("east"), angles (270), and vector strings ([-1,0,0]) to valid vector.]]--
 function TurtleController.valueToOrientation(directionValue)
-    if directionConversions[directionValue] ~= null then return directionConversions[directionValue].vector end
+    if directionValue == nil then return nil end
+    if directionConversions[directionValue] ~= nil then return directionConversions[directionValue].vector end
     if type(directionValue) == 'number' then directionValue = (directionValue + 360 ) % 360  end --Make sure angles range between 0-360
     
     for direction, conversion in pairs(directionConversions) do
