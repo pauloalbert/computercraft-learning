@@ -1,4 +1,9 @@
-
+local VERBOSE = false
+function debugPrint(input)
+    if VERBOSE do
+        print(input)
+    end
+end
 TurtleController = {}
 --[[
     Initialize the turtle controller.
@@ -16,7 +21,7 @@ function TurtleController.__init__ (returnOnFuel,returnOnFilled, saveExact, xs,y
     else
         self.coords = vector.new(gps.locate())
         if self.coords.x == nil then
-            print("COULD NOT GET COORDINATES")
+            debugPrint("COULD NOT GET COORDINATES")
             self.coords = vector.new(0,0,0)
         end
     end
@@ -36,7 +41,7 @@ function TurtleController:calibrateOrientation()
         end
         turtle.turnRight()
     end
-    print("CANT MOVE")
+    debugPrint("CANT MOVE")
     return false
 end
 
@@ -57,7 +62,7 @@ function TurtleController:move(mCommand)
     end
 
     if not moveOdometry[mCommand] then
-        print("INCOMPATIBLE COMMAND ".. mCommand)
+        debugPrint("INCOMPATIBLE COMMAND ".. mCommand)
         return
     end
 
@@ -75,7 +80,7 @@ function TurtleController:face(vec)
         end
         self:move("turnRight")
     end
-    print("INVALID INPUT VECTOR")
+    debugPrint("INVALID INPUT VECTOR")
     return false
 end
 
