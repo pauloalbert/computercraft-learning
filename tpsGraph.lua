@@ -38,16 +38,19 @@ end
 --WEBJSON END
 
 local SAMPLETIME = 3
-
-local monitor = peripheral.find("monitor")
-if monitor == nil then
-	monitor = term.current()
-end
+local BAR_AMOUNT = 7
+--CONSTANTS END
 
 local lastTimeSample = nil
 local timeSample = nil
 
 local histogramTPS = {}
+
+--configure monitor if present, otherwise use terminal.
+local monitor = peripheral.find("monitor")
+if monitor == nil then
+	monitor = term.current()
+end
 
 local function colorass(c,bw)
     return monitor.isColor() and c or bw
@@ -70,6 +73,7 @@ local function getWarningColor(tps)
        
 end
 
+--draws all bars on the screen.
 local function printHistogram(resultstable)
     local x,y = monitor.getSize()
     for index, tps in pairs(resultstable) do
@@ -94,29 +98,32 @@ monitor.write("Waiting for estimation..")
 
 --PERIODIC--
 local function periodic()
+    --sample, wait, sample, calculate the RATIO between the real time and time waited.
     lastTimeSample = webJson.getRealTime()
     sleep(SAMPLETIME)
     timeSample = webJson.getRealTime()
-    local tps = SAMPLETIME*20/((timeSample-lastTimeSample)/10000000)
+    local tps = SAMPLETIME*20/((timeSample-lastTimeSample)/10000000) --calculate tps
     
-    monitor.setBackgroundColor(colorass(colors.blue,colors.black))
+    --draw monitor--
     local x,y = monitor.getSize()
+
+    monitor.setBackgroundColor(colorass(colors.blue,colors.black))
     monitor.setTextColor(colorass(getWarningColor(tps),colors.white))
-    local doBarGraph = x >= 20 and y>= 10
+    local doBarGraph = x >= 20 and y>= 10   --Bar graphs dont fit on all screens so i made a general limit.
     if not doBarGraph then
-        monitor.setBackgroundColor(colorass(getWarningColor(tps),colors.white))
+        monitor.setBackgroundColor(colorass(getWarningColor(tps),colors.black))
         monitor.setTextColor(colors.white)
     end
     monitor.clear()
-    monitor.setCursorPos(x/2-1,y/4)
+    monitor.setCursorPos(x/2-1,math.min(y/4,2))
     monitor.write(math.floor(100*tps)/100)
     
     monitor.setTextColor(colorass(colors.black,colors.white))
-    monitor.setCursorPos(x/2,y/4-1)
+    monitor.setCursorPos(x/2,math.min(y/4-1,1))
     monitor.write("TPS")
     
     table.insert(histogramTPS, tps)
-    if #histogramTPS > 7 then
+    if #histogramTPS > BAR_AMOUNT then
         table.remove(histogramTPS, 1)
     end
     if doBarGraph then
