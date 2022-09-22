@@ -102,6 +102,33 @@ function TurtleController:face(vec)
     return false
 end
 
+local function sign(n)
+    return n > 0 and 1
+       or  n < 0 and 1
+       or  0
+ end
+
+--[[
+    Takes a vector, returns a right angle unitary vector, by the vectors biggest value.
+    returns VECTOR, LENGTH
+    where VECTOR: one of the six right unitary vectors (eg [-1,0,0])
+    LENGTH: non-negative length in the chosen axis.
+
+    example: [3,-25,19]  ->  ret [0,-1,0], 25
+]]--
+function TurtleController.normalizeToGrid(vec)
+    local maxvalue = 0, maxindex = 'x'
+    for i, value in pairs(vec) do
+        if math.abs(value) > maxvalue then
+            maxvalue, maxindex = math.abs(value), i
+        end
+    end
+    local normalized = vector.new(0,0,0)
+    normalized[maxindex] = sign(vec[maxindex]) -- turns into -1 or 1 (or 0?)
+    if normalized[maxindex] == 0 then normalized[maxindex] = 1 end
+    return normalized, vector[maxindex]
+end
+
 local directionConversions = {['1,0,0'] = {name = "east", angle = 90, vector = vector.new(1,0,0)}, 
                               ['0,0,-1'] = {name = "south", angle = 180, vector = vector.new(0,0,-1)},
                               ['-1,0,0'] = {name="west", angle = 270, vector = vector.new(-1,0,0)}, 
