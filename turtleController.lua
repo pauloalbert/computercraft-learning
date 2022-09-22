@@ -102,6 +102,25 @@ function TurtleController:face(vec)
     return false
 end
 
+--move in the direction of a unitary vector a certain amount. undefined behavior for non right-unitary
+function TurtleController:moveVector(unitVec, amount, allowReverse)
+
+    local goingBackwards = allowReverse and -self.direction == unitVec
+    if not goingBackwards then --if allowreverse and facing away, ignore unitVec
+        self:face(unitVec)  --WONT TURN IF ITS UP OR DOWN (could put an if here)
+    end
+    local success = true
+    for i = 1, amount do
+        if unitVec.y > 0 then success = success and self:move("up")
+        elseif unitVec.y < 0 then success = success and self:move("down")
+        elseif goingBackwards then success = success and self:move("back")
+        else success = success and self:move("forward") end
+        if not success then return false end
+    end
+    --todo handle hitting walls.
+    return true
+end
+
 local function sign(n)
     return n > 0 and 1
        or  n < 0 and 1
