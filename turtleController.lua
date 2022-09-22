@@ -194,6 +194,30 @@ function TurtleController:getHome()
     --In the future, can get home from broadcasting computers
     return self.home
 end
-function TurtleController:
+
+function TurtleController:goTo(destination, repeatAttemptCount ,allowReverse)
+    if repeatAtteptCount == nil then repeatAttemptCount = 0 end
+    local order = {'y', 'x', 'z'} --y,x,z
+    for _, direction in ipairs(order) do
+        local path = destination - self.coords
+        local unitVector = vector.new(0,0,0)
+        unitVector.direction = path.direction --assign one length to be nonzero
+
+        --move along ;direction; axis
+        if not self:moveVector(TurtleController.normalizeToGrid(unitVector), allowReverse) then
+            table.insert(hitObstacles, direction)
+        end
+    end
+
+    if repeatAttemptCount > 0 then
+        self:goTo(destination,repeatAttemptCount - 1 , allowReverse)
+    end
+    return self.coords == destination
+end
+
+function TurtleController:checkReturn()
+
+end
+
 
 setmetatable(TurtleController, {__call=TurtleController.__init__})
