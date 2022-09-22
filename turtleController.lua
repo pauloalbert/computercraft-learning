@@ -23,6 +23,7 @@ local directionConversions = {['1,0,0'] = {name = "east", angle = 90, vector = v
     [direction];; optional, string, define original orientation of robot
 ]]--
 function TurtleController.__init__ (returnOnFuel,returnOnFilled, saveExact, xs,ys,zs, direction)
+    print("Starting up turtle...")
     --nil handling?
     local self = {returning = false, absolute = false,FUEL_RETURNS = returnOnFuel, INV_RETURNS = returnOnFilled}
     if(zs ~= nil) then
@@ -185,6 +186,14 @@ function TurtleController.valueToOrientation(directionValue)
     return nil  --Incase of invalid input, return nil
 end
 
+function TurtleController.rotateVector(vec,angle)
+    angle = angle % 360
+    if angle == 0 then return vec
+    elseif angle == 90 or angle == 1 then return vector.new(-vec.z, vec.y, vec.x)
+    elseif angle == 180 or angle == 2 then return vector.new(-vec.x, vec.y, -vec.z)
+    elseif angle == 270 or angle == 3 then return vector.new(vec.z, vec.y, -vec.x)
+end
+
 --[[converts input to vector and sets the direction to be that direction (doesnt work if already vector)]]
 function TurtleController:importOrientation(direction)
     local newOrientation = TurtleController.valueToOrientation(direction)
@@ -224,7 +233,7 @@ function TurtleController:goTo(destination, repeatAttemptCount ,allowReverse)
 end
 
 function TurtleController:checkReturn()
-    
+
 end
 
 
