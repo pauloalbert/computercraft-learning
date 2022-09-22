@@ -24,14 +24,16 @@ local directionConversions = {['1,0,0'] = {name = "east", angle = 90, vector = v
 ]]--
 function TurtleController.__init__ (returnOnFuel,returnOnFilled, saveExact, xs,ys,zs, direction)
     --nil handling?
-    local self = {returning = false, FUEL_RETURNS = returnOnFuel, INV_RETURNS = returnOnFilled}
+    local self = {returning = false, absolute = false,FUEL_RETURNS = returnOnFuel, INV_RETURNS = returnOnFilled}
     if(zs ~= nil) then
         self.coords = vector.new(xs, ys, zs)
     else
         self.coords = vector.new(gps.locate())
         if self.coords.x == nil then
-            debugPrint("COULD NOT GET COORDINATES FROM GPS")
+            debugPrint("TC:init() - COULD NOT GET GPS LOCATION")
             self.coords = vector.new(0,0,0)
+        else
+            self.absolute = true
         end
     end
     
@@ -41,8 +43,8 @@ function TurtleController.__init__ (returnOnFuel,returnOnFilled, saveExact, xs,y
     if direction ~= nil then
         self.direction = direction
     else
-        if not self:calibrateOrientation() then
-            debugPrint("COULD NOT GET COORDINATES FROM GPS")
+        if self.absolute and not self:calibrateOrientation() then
+            debugPrint("TC:calibrate() - COULD NOT GET GPS LOCATION")
         end
     end
 
