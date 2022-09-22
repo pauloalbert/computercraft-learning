@@ -33,6 +33,8 @@ function TurtleController.__init__ (returnOnFuel,returnOnFilled, saveExact, xs,y
             debugPrint("COULD NOT GET COORDINATES FROM GPS")
         end
     end
+
+    self.home = self.coords
     setmetatable (self, {__index=TurtleController})
     return self
 end
@@ -187,7 +189,11 @@ function TurtleController:importOrientation(direction)
     end
 end
 
-    end
+--[[returns home as a VECTOR]]
+function TurtleController:getHome()
+    --In the future, can get home from broadcasting computers
+    return self.home
+end
 function TurtleController:
 
 setmetatable(TurtleController, {__call=TurtleController.__init__})
