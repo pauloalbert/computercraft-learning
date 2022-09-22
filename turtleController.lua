@@ -94,6 +94,7 @@ function TurtleController:face(vec)
         vec = newVec
         end
     end
+    if directionConversions[vec] == nil then debugPrint("TC:face() - vector non unitary") return false end
     for i=0,3 do
         if vec == self.direction then
             return true   
