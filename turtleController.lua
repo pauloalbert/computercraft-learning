@@ -5,6 +5,15 @@ function debugPrint(input)
     end
 end
 TurtleController = {}
+
+--CONSTANTS--
+local directionConversions = {['1,0,0'] = {name = "east", angle = 90, vector = vector.new(1,0,0)}, 
+                              ['0,0,-1'] = {name = "south", angle = 180, vector = vector.new(0,0,-1)},
+                              ['-1,0,0'] = {name="west", angle = 270, vector = vector.new(-1,0,0)}, 
+                              ['0,0,1'] = {name = "north", angle = 0, vector = vector.new(0,0,1)}
+                        }
+
+--FUNCTIONS--
 --[[
     Initialize the turtle controller.
     returnOnFuel: boolean, if true, turtle will return to a recharge station noting that it will have enough fuel
@@ -149,12 +158,6 @@ function TurtleController.normalizeToGrid(vec)
     if normalized[maxindex] == 0 then normalized[maxindex] = 1 end
     return normalized, vector[maxindex]
 end
-
-local directionConversions = {['1,0,0'] = {name = "east", angle = 90, vector = vector.new(1,0,0)}, 
-                              ['0,0,-1'] = {name = "south", angle = 180, vector = vector.new(0,0,-1)},
-                              ['-1,0,0'] = {name="west", angle = 270, vector = vector.new(-1,0,0)}, 
-                              ['0,0,1'] = {name = "north", angle = 0, vector = vector.new(0,0,1)}
-                        }
 
 function TurtleController.orientationToString(directionVector)
     return directionConversions[directionVector.tostring()].name
