@@ -77,7 +77,7 @@ function TurtleController:move(mCommand)
     end
 
     success = turtle[mCommand]() --runs turtle.mCommand()
-    if success and self:direction ~= nil then
+    if success and self.direction ~= nil then
         moveOdometry[mCommand](self)
     end
     return success
@@ -92,7 +92,6 @@ function TurtleController:face(vec)
             return false
         end
         vec = newVec
-        end
     end
     if directionConversions[vec] == nil then debugPrint("TC:face() - vector non unitary") return false end
     for i=0,3 do
@@ -139,7 +138,7 @@ local function sign(n)
     example: [3,-25,19]  ->  ret [0,-1,0], 25
 ]]--
 function TurtleController.normalizeToGrid(vec)
-    local maxvalue = 0, maxindex = 'x'
+    local maxvalue, maxindex = 0, 'x'
     for i, value in pairs(vec) do
         if math.abs(value) > maxvalue then
             maxvalue, maxindex = math.abs(value), i
