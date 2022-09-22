@@ -34,6 +34,9 @@ function TurtleController.__init__ (returnOnFuel,returnOnFilled, saveExact, xs,y
             self.coords = vector.new(0,0,0)
         end
     end
+    
+    setmetatable (self, {__index=TurtleController})
+
     direction = TurtleController.valueToOrientation(direction)
     if direction ~= nil then
         self.direction = direction
@@ -44,7 +47,6 @@ function TurtleController.__init__ (returnOnFuel,returnOnFilled, saveExact, xs,y
     end
 
     self.home = self.coords
-    setmetatable (self, {__index=TurtleController})
     return self
 end
 
@@ -102,14 +104,14 @@ function TurtleController:face(vec)
         end
         vec = newVec
     end
-    if directionConversions[vec] == nil then debugPrint("TC:face() - vector non unitary") return false end
+    if directionConversions[vec:tostring()] == nil then debugPrint("TC:face() - vector non unitary") return false end
     for i=0,3 do
         if vec == self.direction then
             return true   
         end
         self:move("turnRight")
     end
-    debugPrint("TC:face() - INVALID VECTOR: "..vec.tostring())
+    debugPrint("TC:face() - INVALID VECTOR: "..vec:tostring())
     return false
 end
 
@@ -156,15 +158,15 @@ function TurtleController.normalizeToGrid(vec)
     local normalized = vector.new(0,0,0)
     normalized[maxindex] = sign(vec[maxindex]) -- turns into -1 or 1 (or 0?)
     if normalized[maxindex] == 0 then normalized[maxindex] = 1 end
-    return normalized, vector[maxindex]
+    return normalized, vec[maxindex]
 end
 
 function TurtleController.orientationToString(directionVector)
-    return directionConversions[directionVector.tostring()].name
+    return directionConversions[directionVector:tostring()].name
 end
 
 function TurtleController.orientationToDegrees(directionVector)
-    return directionConversions[directionVector.tostring()].angle
+    return directionConversions[directionVector:tostring()].angle
 end
 
 --[[Converts cardinal direction names ("east"), angles (270), and vector strings ([-1,0,0]) to valid vector.]]--
@@ -204,11 +206,12 @@ function TurtleController:goTo(destination, repeatAttemptCount ,allowReverse)
     for _, direction in ipairs(order) do
         local path = destination - self.coords
         local unitVector = vector.new(0,0,0)
-        unitVector.direction = path.direction --assign one length to be nonzero
+        unitVector[direction] = path[direction] --assign one length to be nonzero
 
         --move along ;direction; axis
-        if not self:moveVector(TurtleController.normalizeToGrid(unitVector), allowReverse) then
-            table.insert(hitObstacles, direction)
+        local uv, len = TurtleController.normalizeToGrid(unitVector)
+        if not self:moveVector(uv, len, allowReverse) then
+            --table.insert(hitObstacles, direction)
         end
     end
 
@@ -219,7 +222,7 @@ function TurtleController:goTo(destination, repeatAttemptCount ,allowReverse)
 end
 
 function TurtleController:checkReturn()
-
+    
 end
 
 
