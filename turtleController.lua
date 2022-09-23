@@ -1,16 +1,16 @@
 local VERBOSE = false
-function debugPrint(input)
+function debugPrint(...)
     if VERBOSE then
-        print(input)
+        print(...)
     end
 end
 TurtleController = {}
 
 --CONSTANTS--
-local directionConversions = {['1,0,0'] = {name = "east", angle = 90, vector = vector.new(1,0,0)}, 
-                              ['0,0,-1'] = {name = "south", angle = 180, vector = vector.new(0,0,-1)},
-                              ['-1,0,0'] = {name="west", angle = 270, vector = vector.new(-1,0,0)}, 
-                              ['0,0,1'] = {name = "north", angle = 0, vector = vector.new(0,0,1)}
+local directionConversions = {[1] = {name = "east", angle = 90, vector = vector.new(1,0,0)}, 
+                              [2] = {name = "south", angle = 180, vector = vector.new(0,0,1)},
+                              [3] = {name="west", angle = 270, vector = vector.new(-1,0,0)}, 
+                              [0] = {name = "north", angle = 0, vector = vector.new(0,0,-1)}
                         }
 
 --FUNCTIONS--
@@ -31,7 +31,7 @@ function TurtleController.__init__ (returnOnFuel,returnOnFilled, saveExact, xs,y
     else
         self.coords = vector.new(gps.locate())
         if self.coords.x == nil then
-            debugPrint("TC:init() - COULD NOT GET GPS LOCATION")
+            print("TC:init() - COULD NOT GET GPS LOCATION")
             self.coords = vector.new(0,0,0)
         else
             self.absolute = true
@@ -45,7 +45,7 @@ function TurtleController.__init__ (returnOnFuel,returnOnFilled, saveExact, xs,y
         self.direction = direction
     else
         if self.absolute and not self:calibrateOrientation() then
-            debugPrint("TC:calibrate() - COULD NOT GET GPS LOCATION")
+            print("TC:calibrate() - COULD NOT CALIBRATE ORIENTATION ")
         end
     end
 
@@ -58,26 +58,26 @@ function TurtleController:calibrateOrientation()
     for i=0,3 do
         if turtle.forward() then
             local endCoords = vector.new(gps.locate())
-            self.direction = endCoords - startCoords
+            self.direction = TurtleController.valueToOrientation(endCoords - startCoords)
             --attempt to move back to start (might run out of fuel or get trolled by a player)
-            if not turtle.back() then self.coords:add(self.direction) end
+            if not turtle.back() then self.coords:add(directionConversions[self.direction].vector) end
             return true
         end
         turtle.turnRight()
     end
-    debugPrint("CANT MOVE")
+    debugPrint("can't move, unable to determine orientation")
     return false
 end
 
 function TurtleController:move(mCommand)
     local abbreviations = {f = "forward", u = "up", d="down", tl ="turnLeft", tr = "turnRight", b = "back"} 
     local moveOdometry = {
-        forward = function(tc) tc.coords:add(tc.direction) end,
-        back = function(tc) tc.coords:sub(tc.direction) end,
+        forward = function(tc) tc.coords:add(directionConversions[tc.direction].vector) end,
+        back = function(tc) tc.coords:sub(directionConversions[tc.direction].vector) end,
         up = function(tc) tc.coords:add(vector.new(0,1,0)) end,
-        down = function(tc) tc.coords:add(vector.new(0,1,0)) end,
-        turnLeft = function(tc) tc.direction = vector.new(-tc.direction.z,0,tc.direction.x) end,
-        turnRight = function(tc) tc.direction = vector.new(tc.direction.z, 0, -tc.direction.x) end
+        down = function(tc) tc.coords:sub(vector.new(0,1,0)) end,
+        turnLeft = function(tc) tc.direction = ( tc.direction - 1 ) % 4 end,
+        turnRight = function(tc) tc.direction = ( tc.direction + 1 ) % 4 end
     }
     local success = false
     
@@ -97,33 +97,31 @@ function TurtleController:move(mCommand)
     return success
 end
 
-function TurtleController:face(vec)
-    if type(vec) ~= 'table' then
-        local newVec = TurtleController.valueToOrientation(vec)
+function TurtleController:face(direc)
+    debugPrint("face: ",direc)
+    if not directionConversions[direc] then
+        local newDirec = TurtleController.valueToOrientation(direc)
             
-        if not newVec then
-            debugPrint("TC:face() - INVALID INPUT: "..newVec)
+        if not newDirec then
+            print("TC:face() - INVALID INPUT: ",direc)
             return false
         end
-        vec = newVec
+        direc = newDirec
     end
-    if directionConversions[vec:tostring()] == nil then debugPrint("TC:face() - vector non unitary") return false end
-    for i=0,3 do
-        if vec == self.direction then
-            return true   
-        end
+    if directionConversions[direc] == nil then print("TC:face() - vector non unitary") return false end
+    if (direc - self.direction) % 4 == 3 then self:move("turnLeft") return true end
+    for i=1,(direc-self.direction)%4 do
         self:move("turnRight")
     end
-    debugPrint("TC:face() - INVALID VECTOR: "..vec:tostring())
-    return false
+    return true
 end
 
 --move in the direction of a unitary vector a certain amount. undefined behavior for non right-unitary
 function TurtleController:moveVector(unitVec, amount, allowReverse)
 
-    local goingBackwards = allowReverse and -self.direction == unitVec
+    local goingBackwards = allowReverse and -directionConversions[self.direction].vector == unitVec
     if not goingBackwards then --if allowreverse and facing away, ignore unitVec
-        self:face(unitVec)  --WONT TURN IF ITS UP OR DOWN (could put an if here)
+        self:face(TurtleController.valueToOrientation(unitVec))  --WONT TURN IF ITS UP OR DOWN (could put an if here)
     end
     local success = true
     for i = 1, amount do
@@ -139,7 +137,7 @@ end
 
 local function sign(n)
     return n > 0 and 1
-       or  n < 0 and 1
+       or  n < 0 and -1
        or  0
  end
 
@@ -161,37 +159,29 @@ function TurtleController.normalizeToGrid(vec)
     local normalized = vector.new(0,0,0)
     normalized[maxindex] = sign(vec[maxindex]) -- turns into -1 or 1 (or 0?)
     if normalized[maxindex] == 0 then normalized[maxindex] = 1 end
-    return normalized, vec[maxindex]
+    return normalized, math.abs(vec[maxindex])
 end
 
-function TurtleController.orientationToString(directionVector)
-    return directionConversions[directionVector:tostring()].name
+function TurtleController.orientationToString(direction)
+    return directionConversions[direction].name
 end
 
-function TurtleController.orientationToDegrees(directionVector)
-    return directionConversions[directionVector:tostring()].angle
+function TurtleController.orientationToDegrees(direction)
+    return directionConversions[direction].angle
 end
 
 --[[Converts cardinal direction names ("east"), angles (270), and vector strings ([-1,0,0]) to valid vector.]]--
 function TurtleController.valueToOrientation(directionValue)
     if directionValue == nil then return nil end
-    if directionConversions[directionValue] ~= nil then return directionConversions[directionValue].vector end
-    if type(directionValue) == 'number' then directionValue = (directionValue + 360 ) % 360  end --Make sure angles range between 0-360
+    if directionConversions[directionValue] ~= nil then return directionValue end
+    if type(directionValue) == 'number' then directionValue = directionValue % 360  end --Make sure angles range between 0-360
     
-    for direction, conversion in pairs(directionConversions) do
-        if conversion.angle == directionValue or conversion.name == directionValue then
-            return directionConversions[direction].vector
+    for direction, values in pairs(directionConversions) do
+        for valType, val in pairs(values) do
+            if val == directionValue then return direction end
         end
     end
     return nil  --Incase of invalid input, return nil
-end
-
-function TurtleController.rotateVector(vec,angle)
-    angle = angle % 360
-    if angle == 0 then return vec
-    elseif angle == 90 or angle == 1 then return vector.new(-vec.z, vec.y, vec.x)
-    elseif angle == 180 or angle == 2 then return vector.new(-vec.x, vec.y, -vec.z)
-    elseif angle == 270 or angle == 3 then return vector.new(vec.z, vec.y, -vec.x)
 end
 
 --[[converts input to vector and sets the direction to be that direction (doesnt work if already vector)]]
