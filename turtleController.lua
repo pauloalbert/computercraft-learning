@@ -120,6 +120,8 @@ end
 function TurtleController:moveVector(unitVec, amount, allowReverse)
 
     local goingBackwards = allowReverse and -directionConversions[self.direction].vector == unitVec
+    debugPrint("MoveVector:", unitVec, amount, "going reverse: ", goingBackwards)
+
     if not goingBackwards then --if allowreverse and facing away, ignore unitVec
         self:face(TurtleController.valueToOrientation(unitVec))  --WONT TURN IF ITS UP OR DOWN (could put an if here)
     end
@@ -203,8 +205,9 @@ end
 
 function TurtleController:goTo(destination, repeatAttemptCount ,allowReverse)
     if repeatAtteptCount == nil then repeatAttemptCount = 0 end
+    local lastAttemptAxis == nil
     local order = {'y', 'x', 'z'} --y,x,z
-    for _, direction in ipairs(order) do
+    for index, direction in ipairs(order) do
         local path = destination - self.coords
         local unitVector = vector.new(0,0,0)
         unitVector[direction] = path[direction] --assign one length to be nonzero
@@ -212,12 +215,21 @@ function TurtleController:goTo(destination, repeatAttemptCount ,allowReverse)
         --move along ;direction; axis
         local uv, len = TurtleController.normalizeToGrid(unitVector)
         if not self:moveVector(uv, len, allowReverse) then
-            --table.insert(hitObstacles, direction)
+            lastAttemptAxis = index
+            break
         end
     end
 
-    if repeatAttemptCount > 0 then
-        self:goTo(destination,repeatAttemptCount - 1 , allowReverse)
+    if repeatAttemptCount > 0 and lastAttemptAxis ~= nil then
+        for j = 0,2 do
+            for jsign = 1,-1,-2 do
+                local newVec = vector.new(0,0,0)
+                newVec[order[(lastAttemptAxis + j)%3 + 1]] = jsign
+                if self:moveVector(newVec, 1, allowReverse) then
+                    self:goTo(destination,repeatAttemptCount - 1 , allowReverse)
+                end
+            end
+        end
     end
     return self.coords == destination
 end
