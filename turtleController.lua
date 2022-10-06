@@ -19,8 +19,8 @@ local directionConversions = {[1] = {name = "east", angle = 90, vector = vector.
     returnOnFuel: boolean, if true, turtle will return to a recharge station noting that it will have enough fuel
     returnOnFilled: boolean, if true, will return to base when inventory fills up
     saveExact: boolean, if true, store every move made, so that the turtle can retrace its own steps.
-    [xs,ys,zs];; optional, ints, define initial position
-    [direction];; optional, string, define original orientation of robot
+    [xs,ys,zs]  - optional, ints, define initial position
+    [direction] - optional, int, define original orientation of robot
 ]]--
 function TurtleController.__init__ (returnOnFuel,returnOnFilled, saveExact, xs,ys,zs, direction)
     print("Starting up turtle...")
@@ -87,7 +87,7 @@ function TurtleController:move(mCommand)
 
     if not moveOdometry[mCommand] then
         debugPrint("INCOMPATIBLE COMMAND ".. mCommand)
-        return
+        return false
     end
 
     success = turtle[mCommand]() --runs turtle.mCommand()
@@ -97,6 +97,7 @@ function TurtleController:move(mCommand)
     return success
 end
 
+--face (direction[0-3])
 function TurtleController:face(direc)
     debugPrint("face: ",direc)
     if not directionConversions[direc] then
@@ -109,11 +110,12 @@ function TurtleController:face(direc)
         direc = newDirec
     end
     if directionConversions[direc] == nil then print("TC:face() - vector non unitary") return false end
-    if (direc - self.direction) % 4 == 3 then self:move("turnLeft") return true end
+    if (direc - self.direction) % 4 == 3 then return self:move("turnLeft") end
+    local managed = true
     for i=1,(direc-self.direction)%4 do
-        self:move("turnRight")
+        managed = managed and self:move("turnRight")
     end
-    return true
+    return managed
 end
 
 --move in the direction of a unitary vector a certain amount. undefined behavior for non right-unitary
@@ -205,7 +207,7 @@ end
 
 function TurtleController:goTo(destination, repeatAttemptCount ,allowReverse)
     if repeatAtteptCount == nil then repeatAttemptCount = 0 end
-    local lastAttemptAxis == nil
+    local lastAttemptAxis = nil
     local order = {'y', 'x', 'z'} --y,x,z
     for index, direction in ipairs(order) do
         local path = destination - self.coords
@@ -240,3 +242,21 @@ end
 
 
 setmetatable(TurtleController, {__call=TurtleController.__init__})
+
+local turt = TurtleController(false, false, false, 0,0,0, 0)
+rednet.open("left")
+local absoluteForward = 0 --posZ?
+while true do
+    local id, message, distance = rednet.receive("remote-turtle")
+    local dirVector = nil
+    if message == "forward" then dirVector = absoluteForward + 0 % 4
+    elseif message == "right" then dirVector = absoluteForward + 1 % 4
+    elseif message == "back" then dirVector = absoluteForward + 2 % 4
+    elseif message == "left" then dirVector = absoluteForward + 3 % 4
+    elseif message == "up" then dirVector = vector.new(0,1,0)
+    elseif message == "down" then dirVector = vector.new(0,-1,0)
+    end
+    if directionConversions[dirVector] ~= nil then dirVector = directionConversions[dirVector].vector end
+    local succ = turt:moveVector(dirVector, 1, false)
+    rednet.send(id, message, "remote-turtle-failed")
+end
