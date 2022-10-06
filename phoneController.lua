@@ -10,8 +10,8 @@ ascendButton = window.create(term.current(), termX-bWidth-1, arrowCenter[2] - bH
 descendButton = window.create(term.current(), termX-bWidth-1, arrowCenter[2] + 1, bWidth,bHeight)
 }
 
-local buttonAscii = {leftButton = '\26',
-rightButton = '\27',
+local buttonAscii = {leftButton = '\27',
+rightButton = '\26',
 upButton = '\24',
 downButton = '\25',
 ascendButton = '\30',
@@ -53,20 +53,22 @@ local function drawButton(button, mainColor, accentColor, symbolColor, ascii)
     local bx, by = button.getSize()
     for y = 1, by do
         button.setCursorPos(1,y)
-        button.write(miniPixel(true, false, true, false, true, false, colors[mainColor]), colors[accentColor])))
+        button.write(miniPixel(true, false, true, false, true, false, colors[mainColor]), colors[accentColor])
 
     end
     for x=2,bx do
-        button.setBackgroundColor(mainColor)
-        button.setTextColor(bgColor)
-        button.write(miniPixel(false,false,false,false,true,true,colors[accentColor]), colors[mainColor])))
+        button.setBackgroundColor(colors[accentColor])
+        button.setTextColor(colors[mainColor])
+        button.write(miniPixel(false,false,false,false,true,true,colors[accentColor]), colors[mainColor])
 
     end
 
-    miniPixelBlit(button,true,false,true,false,true,true,colors[accentColor]),colors[mainColor]),1,by)
+    miniPixelBlit(button,true,false,true,false,true,true,colors[accentColor],colors[mainColor],1,by)
 
     button.setCursorPos(bx/2+1, (by+1)/2)
-    button.blit(ascii, mainColor, symbolColor)
+    button.setTextColor(colors[symbolColor])
+    button.setBackgroundColor(colors[mainColor])
+    button.write(ascii)
 end
 
 local function resetGUI()
@@ -84,21 +86,31 @@ while true do
     local event, param1, x, y = os.pullEvent()
     if event == "mouse_click" then
         for name, button in pairs(buttons) do
-            local bx, by = button.getLocation()
+            
+            term.setTextColor(colors.white)
+            
+            local bx, by = button.getPosition()
             local bsx, bsy = button.getSize()
-            if x >= bx and y >= by and x < bx+bsx and y < bsy then
+        
+            if x >= bx and y >= by-0.5 and x < bx+bsx and y < by+bsy-0.5 then
+                
                 rednet.broadcast(buttonFunctions[name], "remote-turtle")
+                term.setCursorPos(1,1)
+                term.write(name)
+                button.clear()
+                sleep(0.05)
                 drawButton(button, "lightGray", "gray", "black", buttonAscii[name])
-                buttonTimers[name] = os.startTimer(2)
+                --button.clear()
+                buttonTimers[name] = os.startTimer(0.5)
             end
         end
-    else if event == "timer" then
+    elseif event == "timer" then
         local targetName = nil
         for name, id in pairs(buttonTimers) do
             if id == param1 then targetName = name end
         end
         if targetName ~= nil then
-            drawButton(button, "white", "gray", "black", buttonAscii[targetName])
+            drawButton(buttons[targetName], "white", "gray", "black", buttonAscii[targetName])
             buttonTimers[targetName] = nil --useful?
         end
     end
