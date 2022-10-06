@@ -20,7 +20,7 @@ descendButton = '\31'}
 local buttonFunctions = {leftButton = "left",
 rightButton = "right",
 upButton = "forward",
-downButton = "down",
+downButton = "back",
 ascendButton = "up",
 descendButton = "down"}
 
